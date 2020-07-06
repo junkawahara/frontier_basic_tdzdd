@@ -33,10 +33,13 @@ private:
     int max_frontier_size_;
 
     void constructEnteringAndLeavingVss() {
+        const int n = graph_.vertexSize();
         const int m = graph_.edgeSize();
 
         entering_vss_.resize(m);
         leaving_vss_.resize(m);
+
+        // compute entering_vss_
         std::set<int> entered_vs;
         for (int i = 0; i < m; ++i) {
             const tdzdd::Graph::EdgeInfo& e = graph_.edgeInfo(i);
@@ -49,6 +52,9 @@ private:
                 entered_vs.insert(e.v2);
             }
         }
+        assert(entered_vs.size() == n);
+
+        // compute leaving_vss_
         std::set<int> leaved_vs;
         for (int i = m - 1; i >= 0; --i) {
             const tdzdd::Graph::EdgeInfo& e = graph_.edgeInfo(i);
@@ -61,6 +67,7 @@ private:
                 leaved_vs.insert(e.v2);
             }
         }
+        assert(leaved_vs.size() == n);
     }
 
     void construct() {
@@ -230,6 +237,8 @@ public:
     }
 
     int getChild(FrontierData* data, int level, int value) const {
+        assert(1 <= level && level <= m_);
+
         // edge index (starting from 0)
         int edge_index = m_ - level;
         // edge that we are processing.
