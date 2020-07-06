@@ -2,16 +2,34 @@
 
 using namespace tdzdd;
 
+// This class manages vertex numbers on the frontier
+// and where deg/comp of each vertex is stored.
 class FrontierManager {
 private:
+    // input graph
     const tdzdd::Graph& graph_;
 
-    // "vs" stands for "vertex set"
+    // frontier_vss_[i] stores the vertices each of
+    // which is incident to both at least one of e_0, e_1,...,e_{i-1}
+    // and at least one of e_{i+1},e_{i+2},...,e_{m-1}, and also stores
+    // both endpoints of e_i, where m is the number of edges.
+    // Note that the definition of the frontier is different from
+    // that in the paper [Kawahara+ 2017].
+    // "vss" stands for "vertex set set".
     std::vector<std::vector<int> > frontier_vss_;
+
+    // entering_vss_[i] stores the vertex numbers
+    // that newly enter the frontier when processing the i-th edge.
     std::vector<std::vector<int> > entering_vss_;
+
+    // leaving_vss_[i] stores the vertex numbers
+    // that leave the frontier after the i-th edge is processed.
     std::vector<std::vector<int> > leaving_vss_;
+
+    // translate the vertex number to the position in the PodArray
     std::vector<int> vertex_to_pos_;
 
+    // the maximum frontier size
     int max_frontier_size_;
 
     void constructEnteringAndLeavingVss() {
@@ -121,27 +139,37 @@ public:
         construct();
     }
 
+    // This function returns the maximum frontier size.
     int getMaxFrontierSize() const {
         return max_frontier_size_;
     }
 
+    // This function returns the vector that stores the vertex numbers
+    // that newly enter the frontier when processing the (index)-th edge.
     const std::vector<int>& getEnteringVs(int index) const {
         return entering_vss_[index];
     }
 
+    // This function returns the vector that stores the vertex numbers
+    // that leave the frontier after the (index)-th edge is processed.
     const std::vector<int>& getLeavingVs(int index) const {
         return leaving_vss_[index];
     }
 
+    // This function returns the vector that stores the vertex numbers
+    // that leave the frontier after the (index)-th edge is processed.
     const std::vector<int>& getFrontierVs(int index) const {
         return frontier_vss_[index];
     }
 
+    // This function translates the vertex number to the position
+    // in the PodArray used by FrontierExampleSpec.
     int vertexToPos(int v) const {
         return vertex_to_pos_[v];
     }
 };
 
+// data associated with each vertex on the frontier
 class FrontierData {
 public:
     short deg;
@@ -160,18 +188,22 @@ private:
 
     const FrontierManager fm_;
 
+    // This function gets deg of v.
     short getDeg(FrontierData* data, int v) const {
         return data[fm_.vertexToPos(v)].deg;
     }
 
+    // This function sets deg of v to be d.
     void setDeg(FrontierData* data, int v, short d) const {
         data[fm_.vertexToPos(v)].deg = d;
     }
 
+    // This function gets comp of v.
     short getComp(FrontierData* data, int v) const {
         return data[fm_.vertexToPos(v)].comp;
     }
 
+    // This function sets comp of v to be c.
     void setComp(FrontierData* data, int v, short c) const {
         data[fm_.vertexToPos(v)].comp = c;
     }
@@ -199,13 +231,13 @@ public:
 
     int getChild(FrontierData* data, int level, int value) const {
         // edge index (starting from 0)
-        int ii = m_ - level;
-        // edge that we are processing
-        // the endpoint of "edge" is edge.v1 and edge.v2
-        const Graph::EdgeInfo& edge = graph_.edgeInfo(ii);
+        int edge_index = m_ - level;
+        // edge that we are processing.
+        // The endpoints of "edge" are edge.v1 and edge.v2.
+        const Graph::EdgeInfo& edge = graph_.edgeInfo(edge_index);
 
         // initialize deg and comp of the vertices newly entering the frontier
-        const std::vector<int>& entering_vs = fm_.getEnteringVs(ii);
+        const std::vector<int>& entering_vs = fm_.getEnteringVs(edge_index);
         for (size_t i = 0; i < entering_vs.size(); ++i) {
             int v = entering_vs[i];
             // initially the value of deg is 0
@@ -215,7 +247,7 @@ public:
         }
 
         // vertices on the frontier
-        const std::vector<int>& frontier_vs = fm_.getFrontierVs(ii);
+        const std::vector<int>& frontier_vs = fm_.getFrontierVs(edge_index);
 
         if (value == 1) { // if we take the edge (go to 1-arc)
             // increment deg of v1 and v2 (recall that edge = {v1, v2})
@@ -239,7 +271,7 @@ public:
         }
 
         // vertices that are leaving the frontier
-        const std::vector<int>& leaving_vs = fm_.getLeavingVs(ii);
+        const std::vector<int>& leaving_vs = fm_.getLeavingVs(edge_index);
         for (size_t i = 0; i < leaving_vs.size(); ++i) {
             int v = leaving_vs[i];
 
@@ -258,7 +290,7 @@ public:
                     continue;
                 }
                 // skip if w is one of the vertices that
-                // already leaved the frontier
+                // has already leaved the frontier
                 for (size_t k = 0; k < i; ++k) {
                     if (w == leaving_vs[k]) {
                         continue;
@@ -306,6 +338,7 @@ public:
             // If we come here, the edge set is empty (taking no edge).
             return 0;
         }
+        assert(level - 1 > 0);
         return level - 1;
     }
 };
