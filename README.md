@@ -12,7 +12,7 @@ make
 ./program grid3x3.txt
 ```
 
-We get the following:
+You will get the following:
 
 ```
 Reading "grid3x3.txt" ... done in 0.00s elapsed, 0.00s user, 4MB.
@@ -25,3 +25,23 @@ FrontierExampleSpec .......... <53> in 0.00s elapsed, 0.00s user, 4MB.
 
 The frontier-based search is implemented in the FrontierExampleSpec
 (as a "spec" of TdZdd).
+
+If you run the program without arguments like
+
+```
+./program
+```
+
+it runs for n x n grid for n = 2,...,10, and you will get the following:
+
+```
+n = 2, # of solutions = 1
+n = 3, # of solutions = 13
+n = 4, # of solutions = 213
+n = 5, # of solutions = 9349
+n = 6, # of solutions = 1222363
+n = 7, # of solutions = 487150371
+n = 8, # of solutions = 603841648931
+n = 9, # of solutions = 2318527339461265
+n = 10, # of solutions = 27359264067916806101
+```
