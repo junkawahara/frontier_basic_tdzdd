@@ -45,3 +45,6 @@ n = 8, # of solutions = 603841648931
 n = 9, # of solutions = 2318527339461265
 n = 10, # of solutions = 27359264067916806101
 ```
+
+This implementation uses the Graph class in the TdZdd library. See the document in [English](https://github.com/junkawahara/documents/blob/master/tdzdd_graph_en.md) or [Japanese](https://github.com/junkawahara/documents/blob/master/tdzdd_graph_ja.md).
+
