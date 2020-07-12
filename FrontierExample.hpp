@@ -86,8 +86,8 @@ private:
         std::set<int> current_vs;
         for (int i = 0; i < m; ++i) {
             const std::vector<int>& entering_vs = entering_vss_[i];
-            for (size_t i = 0; i < entering_vs.size(); ++i) {
-                int v = entering_vs[i];
+            for (size_t j = 0; j < entering_vs.size(); ++j) {
+                int v = entering_vs[j];
                 current_vs.insert(v);
                 int u = unused.back();
                 unused.pop_back();
@@ -107,8 +107,8 @@ private:
             }
 
             const std::vector<int>& leaving_vs = leaving_vss_[i];
-            for (size_t i = 0; i < leaving_vs.size(); ++i) {
-                int v = leaving_vs[i];
+            for (size_t j = 0; j < leaving_vs.size(); ++j) {
+                int v = leaving_vs[j];
                 current_vs.erase(v);
                 unused.push_back(vertex_to_pos_[v]);
             }
