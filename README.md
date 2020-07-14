@@ -3,7 +3,7 @@
 An example implementation of the frontier-based search
 using TdZdd (https://github.com/kunisura/TdZdd ).
 
-This program constructs a ZDD representing all the single cycles.
+This program constructs a ZDD representing all the single cycles and a ZDD representing all the s-t paths on a given graph.
 
 ## usage
 
@@ -23,8 +23,19 @@ FrontierExampleSpec .......... <53> in 0.00s elapsed, 0.00s user, 4MB.
 # of solutions = 13
 ```
 
-The frontier-based search is implemented in the FrontierExampleSpec
-(as a "spec" of TdZdd).
+This constructs a ZDD representing all the single cycles.
+
+If you run
+
+```
+./program grid3x3.txt -p
+```
+
+You will get a ZDD representing all the s-t paths.
+
+The frontier-based search for single cycles is implemented in the FrontierSingleCycleSpec class
+(as a "spec" of TdZdd),
+and that for s-t paths is implemeneted in the FrontierSTPathSpec class.
 
 If you run the program without arguments like
 
