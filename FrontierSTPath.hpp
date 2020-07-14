@@ -1,19 +1,19 @@
-#ifndef FRONTIER_SINGLE_CYCLE_HPP
-#define FRONTIER_SINGLE_CYCLE_HPP
+#ifndef FRONTIER_ST_PATH_HPP
+#define FRONTIER_ST_PATH_HPP
 
 #include <vector>
 
 using namespace tdzdd;
 
 // data associated with each vertex on the frontier
-class FrontierData {
+class FrontierData2 {
 public:
     short deg;
     short comp;
 };
 
-class FrontierSingleCycleSpec
-    : public tdzdd::PodArrayDdSpec<FrontierSingleCycleSpec, FrontierData, 2> {
+class FrontierSTPathSpec
+    : public tdzdd::PodArrayDdSpec<FrontierSTPathSpec, FrontierData2, 2> {
 private:
     // input graph
     const tdzdd::Graph& graph_;
@@ -22,29 +22,33 @@ private:
     // number of edges
     const int m_;
 
+    // endpoints of a path
+    const int s_;
+    const int t_;
+
     const FrontierManager fm_;
 
     // This function gets deg of v.
-    short getDeg(FrontierData* data, int v) const {
+    short getDeg(FrontierData2* data, int v) const {
         return data[fm_.vertexToPos(v)].deg;
     }
 
     // This function sets deg of v to be d.
-    void setDeg(FrontierData* data, int v, short d) const {
+    void setDeg(FrontierData2* data, int v, short d) const {
         data[fm_.vertexToPos(v)].deg = d;
     }
 
     // This function gets comp of v.
-    short getComp(FrontierData* data, int v) const {
+    short getComp(FrontierData2* data, int v) const {
         return data[fm_.vertexToPos(v)].comp;
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierData* data, int v, short c) const {
+    void setComp(FrontierData2* data, int v, short c) const {
         data[fm_.vertexToPos(v)].comp = c;
     }
 
-    void initializeDegComp(FrontierData* data) const {
+    void initializeDegComp(FrontierData2* data) const {
         for (int i = 0; i < fm_.getMaxFrontierSize(); ++i) {
             data[i].deg = 0;
             data[i].comp = 0;
@@ -52,20 +56,24 @@ private:
     }
 
 public:
-    FrontierSingleCycleSpec(const tdzdd::Graph& graph) : graph_(graph),
-                                                     n_(graph_.vertexSize()),
-                                                     m_(graph_.edgeSize()),
-                                                     fm_(graph_)
+    FrontierSTPathSpec(const tdzdd::Graph& graph,
+                       int s, int t)
+        : graph_(graph),
+          n_(graph_.vertexSize()),
+          m_(graph_.edgeSize()),
+          s_(s),
+          t_(t),
+          fm_(graph_)
     {
         setArraySize(fm_.getMaxFrontierSize());
     }
 
-    int getRoot(FrontierData* data) const {
+    int getRoot(FrontierData2* data) const {
         initializeDegComp(data);
         return m_;
     }
 
-    int getChild(FrontierData* data, int level, int value) const {
+    int getChild(FrontierData2* data, int level, int value) const {
         assert(1 <= level && level <= m_);
 
         // edge index (starting from 0)
@@ -113,9 +121,16 @@ public:
         for (size_t i = 0; i < leaving_vs.size(); ++i) {
             int v = leaving_vs[i];
 
-            // The degree of v must be 0 or 2.
-            if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
-                return 0;
+            if (v == s_ || v == t_) {
+                // The degree of s and t must be 1.
+                if (getDeg(data, v) != 1) {
+                    return 0;
+                }
+            } else {
+                // The degree of v (!= s, t) must be 0 or 2.
+                if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
+                    return 0;
+                }
             }
             bool comp_found = false;
             bool deg_found = false;
@@ -157,7 +172,7 @@ public:
                 // connected component other than that of v.
                 // That is, the generated subgraph is not connected.
                 // Then, we return the 0-terminal.
-                assert(getDeg(data, v) == 0 || getDeg(data, v) == 2);
+                //assert(getDeg(data, v) == 0 || getDeg(data, v) == 2);
                 if (getDeg(data, v) > 0 && deg_found) {
                     return 0; // return the 0-terminal.
                 } else if (getDeg(data, v) > 0) { // If deg of v is 2,
@@ -181,4 +196,4 @@ public:
     }
 };
 
-#endif // FRONTIER_SINGLE_CYCLE_HPP
+#endif // FRONTIER_ST_PATH_HPP

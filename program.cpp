@@ -12,6 +12,7 @@ using namespace tdzdd;
 
 #include "FrontierManager.hpp"
 #include "FrontierSingleCycle.hpp"
+#include "FrontierSTPath.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
@@ -46,7 +47,7 @@ int main(int argc, char** argv) {
             tdzdd::Graph graph;
             makeGridGraph(graph, n);
             FrontierManager fm(graph);
-            FrontierExampleSpec spec(graph);
+            FrontierSingleCycleSpec spec(graph);
             DdStructure<2> dd(spec);
             std::cerr << "n = " << n << ", # of solutions = "
                       << dd.zddCardinality();
@@ -68,9 +69,16 @@ int main(int argc, char** argv) {
         std::cerr << "# of vertices = " << graph.vertexSize() << std::endl;
         std::cerr << "# of edges = " << graph.edgeSize() << std::endl;
 
-        FrontierExampleSpec spec(graph);
+        DdStructure<2> dd;
 
-        DdStructure<2> dd(spec);
+        // path
+        if (argc >= 3 && std::string(argv[2]) == std::string("-p")) {
+            FrontierSTPathSpec spec(graph, 1, graph.vertexSize());
+            dd = DdStructure<2>(spec);
+        } else { // cycle
+            FrontierSingleCycleSpec spec(graph);
+            dd = DdStructure<2>(spec);
+        }
 
         std::cerr << "# of ZDD nodes = " << dd.size() << std::endl;
         std::cerr << "# of solutions = " << dd.zddCardinality() << std::endl;
