@@ -10,7 +10,8 @@
 
 using namespace tdzdd;
 
-#include "FrontierExample.hpp"
+#include "FrontierManager.hpp"
+#include "FrontierSingleCycle.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
