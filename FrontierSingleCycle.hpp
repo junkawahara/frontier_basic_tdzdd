@@ -129,11 +129,17 @@ public:
                 }
                 // skip if w is one of the vertices that
                 // has already leaved the frontier
+                bool found_leaved = false;
                 for (size_t k = 0; k < i; ++k) {
                     if (w == leaving_vs[k]) {
-                        continue;
+                        found_leaved = true;
+                        break;
                     }
                 }
+                if (found_leaved) {
+                    continue;
+                }
+
                 // w has the component number same as that of v
                 if (getComp(data, w) == getComp(data, v)) {
                     comp_found = true;
