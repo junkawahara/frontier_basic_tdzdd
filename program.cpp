@@ -14,6 +14,7 @@ using namespace tdzdd;
 #include "FrontierSingleCycle.hpp"
 #include "FrontierSTPath.hpp"
 #include "FrontierTree.hpp"
+#include "FrontierMatching.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
@@ -67,6 +68,8 @@ int main(int argc, char** argv) {
         bool is_forest = false;
         bool is_tree = false;
         bool is_stree = false;
+        bool is_matching = false;
+        bool is_cmatching = false;
 
         bool readfirst = false;
         for (int i = 1; i < argc; ++i) {
@@ -84,6 +87,10 @@ int main(int argc, char** argv) {
                 is_tree = true;
             } else if (std::string(argv[i]) == std::string("--stree")) {
                 is_stree = true;
+            } else if (std::string(argv[i]) == std::string("--matching")) {
+                is_matching = true;
+            } else if (std::string(argv[i]) == std::string("--cmatching")) {
+                is_cmatching = true;
             } else if (std::string(argv[i]) == std::string("--show")) {
                 tdzdd::MessageHandler::showMessages(true);
             } else if (argv[i][0] == '-') {
@@ -127,6 +134,12 @@ int main(int argc, char** argv) {
             dd = DdStructure<2>(spec);
         } else if (is_stree) {
             FrontierTreeSpec spec(graph, true, true);
+            dd = DdStructure<2>(spec);
+        } else if (is_matching) {
+            FrontierMatchingSpec spec(graph, false);
+            dd = DdStructure<2>(spec);
+        } else if (is_cmatching) {
+            FrontierMatchingSpec spec(graph, true);
             dd = DdStructure<2>(spec);
         } else {
             std::cerr << "Please specify a kind of subgraphs." << std::endl;
