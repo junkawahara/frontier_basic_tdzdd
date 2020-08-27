@@ -13,6 +13,7 @@ using namespace tdzdd;
 #include "FrontierManager.hpp"
 #include "FrontierSingleCycle.hpp"
 #include "FrontierSTPath.hpp"
+#include "FrontierTree.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
             tdzdd::Graph graph;
             makeGridGraph(graph, n);
             FrontierManager fm(graph);
-            FrontierSingleCycleSpec spec(graph);
+            FrontierSingleCycleSpec spec(graph, false);
             DdStructure<2> dd(spec);
             std::cerr << "n = " << n << ", # of solutions = "
                       << dd.zddCardinality();
@@ -58,11 +59,46 @@ int main(int argc, char** argv) {
             std::cerr << std::endl;
         }
     } else {
-        tdzdd::MessageHandler::showMessages(true);
-
         tdzdd::Graph graph;
+        bool is_path = false;
+        bool is_ham_path = false;
+        bool is_cycle = false;
+        bool is_ham_cycle = false;
+        bool is_forest = false;
+        bool is_tree = false;
+        bool is_stree = false;
 
-        graph.readEdges(argv[1]);
+        bool readfirst = false;
+        for (int i = 1; i < argc; ++i) {
+            if (std::string(argv[i]) == std::string("--path")) {
+                is_path = true;
+            } else if (std::string(argv[i]) == std::string("--hampath")) {
+                is_ham_path = true;
+            } else if (std::string(argv[i]) == std::string("--cycle")) {
+                is_cycle = true;
+            } else if (std::string(argv[i]) == std::string("--hamcycle")) {
+                is_ham_cycle = true;
+            } else if (std::string(argv[i]) == std::string("--forest")) {
+                is_forest = true;
+            } else if (std::string(argv[i]) == std::string("--tree")) {
+                is_tree = true;
+            } else if (std::string(argv[i]) == std::string("--stree")) {
+                is_stree = true;
+            } else if (std::string(argv[i]) == std::string("--show")) {
+                tdzdd::MessageHandler::showMessages(true);
+            } else if (argv[i][0] == '-') {
+                std::cerr << "unknown option " << argv[i] << std::endl;
+                return 1;
+            } else {
+                if (!readfirst) {
+                    readfirst = true;
+                    graph.readEdges(argv[i]);
+                } else {
+                    std::cerr << "illegal argument " << argv[i] << std::endl;
+                    return 1;
+                }
+            }
+        }
 
         FrontierManager fm(graph);
 
@@ -71,13 +107,30 @@ int main(int argc, char** argv) {
 
         DdStructure<2> dd;
 
-        // path
-        if (argc >= 3 && std::string(argv[2]) == std::string("-p")) {
-            FrontierSTPathSpec spec(graph, 1, graph.vertexSize());
+        if (is_path) {
+            FrontierSTPathSpec spec(graph, false, 1, graph.vertexSize());
             dd = DdStructure<2>(spec);
-        } else { // cycle
-            FrontierSingleCycleSpec spec(graph);
+        } else if (is_ham_path) {
+            FrontierSTPathSpec spec(graph, true, 1, graph.vertexSize());
             dd = DdStructure<2>(spec);
+        } else if (is_cycle) {
+            FrontierSingleCycleSpec spec(graph, false);
+            dd = DdStructure<2>(spec);
+        } else if (is_ham_cycle) {
+            FrontierSingleCycleSpec spec(graph, true);
+            dd = DdStructure<2>(spec);
+        } else if (is_forest) {
+            FrontierTreeSpec spec(graph, false, false);
+            dd = DdStructure<2>(spec);
+        } else if (is_tree) {
+            FrontierTreeSpec spec(graph, true, false);
+            dd = DdStructure<2>(spec);
+        } else if (is_stree) {
+            FrontierTreeSpec spec(graph, true, true);
+            dd = DdStructure<2>(spec);
+        } else {
+            std::cerr << "Please specify a kind of subgraphs." << std::endl;
+            exit(1);
         }
 
         std::cerr << "# of ZDD nodes = " << dd.size() << std::endl;

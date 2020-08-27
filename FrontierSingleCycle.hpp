@@ -22,6 +22,8 @@ private:
     // number of edges
     const int m_;
 
+    const bool isHamilton_;
+
     const FrontierManager fm_;
 
     // This function gets deg of v.
@@ -52,10 +54,12 @@ private:
     }
 
 public:
-    FrontierSingleCycleSpec(const tdzdd::Graph& graph) : graph_(graph),
-                                                     n_(graph_.vertexSize()),
-                                                     m_(graph_.edgeSize()),
-                                                     fm_(graph_)
+    FrontierSingleCycleSpec(const tdzdd::Graph& graph,
+                            bool isHamilton) : graph_(graph),
+                                               n_(graph_.vertexSize()),
+                                               m_(graph_.edgeSize()),
+                                               isHamilton_(isHamilton),
+                                               fm_(graph_)
     {
         setArraySize(fm_.getMaxFrontierSize());
     }
@@ -113,12 +117,20 @@ public:
         for (size_t i = 0; i < leaving_vs.size(); ++i) {
             int v = leaving_vs[i];
 
-            // The degree of v must be 0 or 2.
-            if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
-                return 0;
+            if (isHamilton_) {
+                // The degree of v must be 2.
+                if (getDeg(data, v) != 2) {
+                    return 0;
+                }
+            } else {
+                // The degree of v must be 0 or 2.
+                if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
+                    return 0;
+                }
             }
             bool comp_found = false;
             bool deg_found = false;
+            bool frontier_exists = false;
             // Search a vertex that has the component number same as that of v.
             // Also check whether a vertex whose degree is at least 1 exists
             // on the frontier.
@@ -139,7 +151,7 @@ public:
                 if (found_leaved) {
                     continue;
                 }
-
+                frontier_exists = true;
                 // w has the component number same as that of v
                 if (getComp(data, w) == getComp(data, v)) {
                     comp_found = true;
@@ -170,7 +182,15 @@ public:
                     // and there is no vertex whose deg is at least 1
                     // a single cycle is completed.
                     // Then, we return the 1-terminal
-                    return -1; // return the 1-terminal
+                    if (isHamilton_) {
+                        if (frontier_exists) {
+                            return 0;
+                        } else {
+                            return -1; // return the 1-terminal
+                        }
+                    } else {
+                        return -1; // return the 1-terminal
+                    }
                 }
             }
             // Since deg and comp of v are never used until the end,

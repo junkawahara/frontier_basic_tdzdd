@@ -22,6 +22,8 @@ private:
     // number of edges
     const int m_;
 
+    const bool isHamilton_;
+
     // endpoints of a path
     const int s_;
     const int t_;
@@ -57,10 +59,11 @@ private:
 
 public:
     FrontierSTPathSpec(const tdzdd::Graph& graph,
-                       int s, int t)
+                       bool isHamilton, int s, int t)
         : graph_(graph),
           n_(graph_.vertexSize()),
           m_(graph_.edgeSize()),
+          isHamilton_(isHamilton),
           s_(s),
           t_(t),
           fm_(graph_)
@@ -127,13 +130,21 @@ public:
                     return 0;
                 }
             } else {
-                // The degree of v (!= s, t) must be 0 or 2.
-                if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
-                    return 0;
+                if (isHamilton_) {
+                    // The degree of v (!= s, t) must be 2.
+                    if (getDeg(data, v) != 2) {
+                        return 0;
+                    }
+                } else {
+                    // The degree of v (!= s, t) must be 0 or 2.
+                    if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
+                        return 0;
+                    }
                 }
             }
             bool comp_found = false;
             bool deg_found = false;
+            bool frontier_exists = false;
             // Search a vertex that has the component number same as that of v.
             // Also check whether a vertex whose degree is at least 1 exists
             // on the frontier.
@@ -154,6 +165,7 @@ public:
                 if (found_leaved) {
                     continue;
                 }
+                frontier_exists = true;
                 // w has the component number same as that of v
                 if (getComp(data, w) == getComp(data, v)) {
                     comp_found = true;
@@ -183,7 +195,15 @@ public:
                     // and there is no vertex whose deg is at least 1
                     // a single cycle is completed.
                     // Then, we return the 1-terminal
-                    return -1; // return the 1-terminal
+                    if (isHamilton_) {
+                        if (frontier_exists) {
+                            return 0;
+                        } else {
+                            return -1; // return the 1-terminal
+                        }
+                    } else {
+                        return -1; // return the 1-terminal
+                    }
                 }
             }
             // Since deg and comp of v are never used until the end,
