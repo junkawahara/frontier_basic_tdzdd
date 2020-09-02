@@ -15,6 +15,7 @@ using namespace tdzdd;
 #include "FrontierSTPath.hpp"
 #include "FrontierTree.hpp"
 #include "FrontierMatching.hpp"
+#include "FrontierMate.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
@@ -70,6 +71,7 @@ int main(int argc, char** argv) {
         bool is_stree = false;
         bool is_matching = false;
         bool is_cmatching = false;
+        bool is_dot = false;
 
         bool readfirst = false;
         for (int i = 1; i < argc; ++i) {
@@ -93,6 +95,8 @@ int main(int argc, char** argv) {
                 is_cmatching = true;
             } else if (std::string(argv[i]) == std::string("--show")) {
                 tdzdd::MessageHandler::showMessages(true);
+            } else if (std::string(argv[i]) == std::string("--dot")) {
+                is_dot = true;
             } else if (argv[i][0] == '-') {
                 std::cerr << "unknown option " << argv[i] << std::endl;
                 return 1;
@@ -115,13 +119,18 @@ int main(int argc, char** argv) {
         DdStructure<2> dd;
 
         if (is_path) {
-            FrontierSTPathSpec spec(graph, false, 1, graph.vertexSize());
+            std::ostringstream oss;
+            oss << graph.vertexSize();
+            //FrontierSTPathSpec spec(graph, false, graph.getVertex("1"), graph.getVertex(oss.str()));
+            FrontierMateSpec spec(graph, false, false, graph.getVertex("1"), graph.getVertex(oss.str()));
             dd = DdStructure<2>(spec);
         } else if (is_ham_path) {
             FrontierSTPathSpec spec(graph, true, 1, graph.vertexSize());
             dd = DdStructure<2>(spec);
         } else if (is_cycle) {
-            FrontierSingleCycleSpec spec(graph, false);
+            //FrontierSingleCycleSpec spec(graph, false);
+            //std::cerr << "here";
+            FrontierMateSpec spec(graph, true, false, -1, -1);
             dd = DdStructure<2>(spec);
         } else if (is_ham_cycle) {
             FrontierSingleCycleSpec spec(graph, true);
@@ -149,7 +158,9 @@ int main(int argc, char** argv) {
         std::cerr << "# of ZDD nodes = " << dd.size() << std::endl;
         std::cerr << "# of solutions = " << dd.zddCardinality() << std::endl;
 
-        //dd.dumpDot(std::cout);
+        if (is_dot) {
+            dd.dumpDot(std::cout);
+        }
     }
 
     return 0;

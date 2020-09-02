@@ -192,9 +192,9 @@ public:
                 if (getDeg(data, v) > 0 && deg_found) {
                     return 0; // return the 0-terminal.
                 } else if (getDeg(data, v) > 0) { // If deg of v is 2,
-                    // and there is no vertex whose deg is at least 1
+                    // and there is no vertex whose deg is at least 1,
                     // a single cycle is completed.
-                    // Then, we return the 1-terminal
+                    // Then, we return the 1-terminal.
                     if (isHamilton_) {
                         if (frontier_exists) {
                             return 0;

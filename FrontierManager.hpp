@@ -29,6 +29,8 @@ private:
     // that leave the frontier after the i-th edge is processed.
     std::vector<std::vector<int> > leaving_vss_;
 
+    std::vector<std::vector<int> > remaining_vss_;
+
     // translate the vertex number to the position in the PodArray
     std::vector<int> vertex_to_pos_;
 
@@ -176,6 +178,17 @@ public:
     // in the PodArray used by FrontierExampleSpec.
     int vertexToPos(int v) const {
         return vertex_to_pos_[v];
+    }
+
+    int getVerticesEnteringLevel(int v) const {
+        for (size_t i = 0; i < entering_vss_.size(); ++i) {
+            for (size_t j = 0; j < entering_vss_[i].size(); ++j) {
+                if (entering_vss_[i][j] == v) {
+                    return static_cast<int>(i);
+                }
+            }
+        }
+        return -1;
     }
 };
 
