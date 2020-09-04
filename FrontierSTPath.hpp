@@ -30,6 +30,9 @@ private:
 
     const FrontierManager fm_;
 
+    const int s_entered_level_;
+    const int t_entered_level_;
+
     // This function gets deg of v.
     short getDeg(FrontierData2* data, int v) const {
         return data[fm_.vertexToPos(v)].deg;
@@ -57,6 +60,10 @@ private:
         }
     }
 
+    int computeEnteredLevel(int v) const {
+        return m_ - fm_.getVerticesEnteringLevel(v);
+    }
+
 public:
     FrontierSTPathSpec(const tdzdd::Graph& graph,
                        bool isHamilton, int s, int t)
@@ -66,7 +73,9 @@ public:
           isHamilton_(isHamilton),
           s_(s),
           t_(t),
-          fm_(graph_)
+          fm_(graph_),
+          s_entered_level_(computeEnteredLevel(s)),
+          t_entered_level_(computeEnteredLevel(t))
     {
         setArraySize(fm_.getMaxFrontierSize());
     }
@@ -202,7 +211,12 @@ public:
                             return -1; // return the 1-terminal
                         }
                     } else {
-                        return -1; // return the 1-terminal
+                        if (level > s_entered_level_
+                            || level > t_entered_level_) {
+                            return 0;
+                        } else {
+                            return -1; // return the 1-terminal
+                        }
                     }
                 }
             }

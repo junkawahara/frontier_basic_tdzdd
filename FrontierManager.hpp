@@ -190,6 +190,17 @@ public:
         }
         return -1;
     }
+
+    int getAllVerticesEnteringLevel() const {
+        int n = static_cast<int>(entering_vss_.size());
+
+        for (int i = n - 1; i >= 0; --i) {
+            if (entering_vss_[i].size() > 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
 };
 
 #endif // __FRONTIER_MANAGER_HPP

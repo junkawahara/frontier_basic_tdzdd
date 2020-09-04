@@ -29,6 +29,7 @@ private:
 
     const int s_entered_level_;
     const int t_entered_level_;
+    const int all_entered_level_;
 
     short getMate(FrontierMate* data, int v) const {
         return data[fm_.vertexToPos(v)];
@@ -46,26 +47,45 @@ private:
 
     int computeEnteredLevel(int v) const {
         if (isCycle_) {
-            return -1; // never used
+            return -1; // This value is never used.
         } else {
             return m_ - fm_.getVerticesEnteringLevel(v);
         }
     }
 
 public:
+    // for cycles
     FrontierMateSpec(const tdzdd::Graph& graph,
-                     bool isCycle,
+                     bool isHamilton)
+        : graph_(graph),
+          n_(graph_.vertexSize()),
+          m_(graph_.edgeSize()),
+          isCycle_(true),
+          isHamilton_(isHamilton),
+          s_(-1),
+          t_(-1),
+          fm_(graph_),
+          s_entered_level_(-1),
+          t_entered_level_(-1),
+          all_entered_level_(m_ - fm_.getAllVerticesEnteringLevel())
+    {
+        setArraySize(fm_.getMaxFrontierSize());
+    }
+
+    // for paths
+    FrontierMateSpec(const tdzdd::Graph& graph,
                      bool isHamilton, int s, int t)
         : graph_(graph),
           n_(graph_.vertexSize()),
           m_(graph_.edgeSize()),
-          isCycle_(isCycle),
+          isCycle_(false),
           isHamilton_(isHamilton),
           s_(s),
           t_(t),
           fm_(graph_),
           s_entered_level_(computeEnteredLevel(s)),
-          t_entered_level_(computeEnteredLevel(t))
+          t_entered_level_(computeEnteredLevel(t)),
+          all_entered_level_(m_ - fm_.getAllVerticesEnteringLevel())
     {
         setArraySize(fm_.getMaxFrontierSize());
     }
@@ -135,9 +155,9 @@ public:
                     }
                 }
                 if (isHamilton_) {
-                    //if (IsExistUnprocessedVertex()) {
-                    //    return 0;
-                    //}
+                    if (level > all_entered_level_) {
+                        return 0;
+                    }
                 }
                 return -1; // return the 1-terminal
             }
