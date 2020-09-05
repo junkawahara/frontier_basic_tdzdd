@@ -22,7 +22,7 @@ private:
     // number of edges
     const int m_;
 
-    const bool isHamilton_;
+    const bool isHamiltonian_;
 
     const FrontierManager fm_;
 
@@ -55,10 +55,10 @@ private:
 
 public:
     FrontierSingleCycleSpec(const tdzdd::Graph& graph,
-                            bool isHamilton) : graph_(graph),
+                            bool isHamiltonian) : graph_(graph),
                                                n_(graph_.vertexSize()),
                                                m_(graph_.edgeSize()),
-                                               isHamilton_(isHamilton),
+                                               isHamiltonian_(isHamiltonian),
                                                fm_(graph_)
     {
         setArraySize(fm_.getMaxFrontierSize());
@@ -117,7 +117,7 @@ public:
         for (size_t i = 0; i < leaving_vs.size(); ++i) {
             int v = leaving_vs[i];
 
-            if (isHamilton_) {
+            if (isHamiltonian_) {
                 // The degree of v must be 2.
                 if (getDeg(data, v) != 2) {
                     return 0;
@@ -182,7 +182,7 @@ public:
                     // and there is no vertex whose deg is at least 1
                     // a single cycle is completed.
                     // Then, we return the 1-terminal
-                    if (isHamilton_) {
+                    if (isHamiltonian_) {
                         if (frontier_exists) {
                             return 0;
                         } else {

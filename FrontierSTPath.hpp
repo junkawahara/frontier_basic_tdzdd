@@ -22,7 +22,7 @@ private:
     // number of edges
     const int m_;
 
-    const bool isHamilton_;
+    const bool isHamiltonian_;
 
     // endpoints of a path
     const int s_;
@@ -66,11 +66,11 @@ private:
 
 public:
     FrontierSTPathSpec(const tdzdd::Graph& graph,
-                       bool isHamilton, int s, int t)
+                       bool isHamiltonian, int s, int t)
         : graph_(graph),
           n_(graph_.vertexSize()),
           m_(graph_.edgeSize()),
-          isHamilton_(isHamilton),
+          isHamiltonian_(isHamiltonian),
           s_(s),
           t_(t),
           fm_(graph_),
@@ -139,7 +139,7 @@ public:
                     return 0;
                 }
             } else {
-                if (isHamilton_) {
+                if (isHamiltonian_) {
                     // The degree of v (!= s, t) must be 2.
                     if (getDeg(data, v) != 2) {
                         return 0;
@@ -204,7 +204,7 @@ public:
                     // and there is no vertex whose deg is at least 1,
                     // a single cycle is completed.
                     // Then, we return the 1-terminal.
-                    if (isHamilton_) {
+                    if (isHamiltonian_) {
                         if (frontier_exists) {
                             return 0;
                         } else {

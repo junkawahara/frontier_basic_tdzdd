@@ -19,7 +19,7 @@ private:
     const int m_;
 
     const bool isCycle_;
-    const bool isHamilton_;
+    const bool isHamiltonian_;
 
     // endpoints of a path
     const int s_;
@@ -56,12 +56,12 @@ private:
 public:
     // for cycles
     FrontierMateSpec(const tdzdd::Graph& graph,
-                     bool isHamilton)
+                     bool isHamiltonian)
         : graph_(graph),
           n_(graph_.vertexSize()),
           m_(graph_.edgeSize()),
           isCycle_(true),
-          isHamilton_(isHamilton),
+          isHamiltonian_(isHamiltonian),
           s_(-1),
           t_(-1),
           fm_(graph_),
@@ -74,12 +74,12 @@ public:
 
     // for paths
     FrontierMateSpec(const tdzdd::Graph& graph,
-                     bool isHamilton, int s, int t)
+                     bool isHamiltonian, int s, int t)
         : graph_(graph),
           n_(graph_.vertexSize()),
           m_(graph_.edgeSize()),
           isCycle_(false),
-          isHamilton_(isHamilton),
+          isHamiltonian_(isHamiltonian),
           s_(s),
           t_(t),
           fm_(graph_),
@@ -143,7 +143,7 @@ public:
                 for (size_t i = 0; i < frontier_vs.size(); ++i) {
                     int v = frontier_vs[i];
                     if (v != edge.v1 && v != edge.v2) {
-                        if (isHamilton_) {
+                        if (isHamiltonian_) {
                             if (getMate(data, v) != 0) {
                                 return 0;
                             }
@@ -154,7 +154,7 @@ public:
                         }
                     }
                 }
-                if (isHamilton_) {
+                if (isHamiltonian_) {
                     if (level > all_entered_level_) {
                         return 0;
                     }
@@ -182,7 +182,7 @@ public:
         for (size_t i = 0; i < leaving_vs.size(); ++i) {
             int v = leaving_vs[i];
 
-            if (isHamilton_) {
+            if (isHamiltonian_) {
                 // The degree of v (!= s, t) must be 2.
                 if (getMate(data, v) != 0) {
                     return 0;
