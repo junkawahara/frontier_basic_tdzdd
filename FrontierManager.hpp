@@ -103,47 +103,36 @@ private:
                 max_frontier_size_ = current_vs.size();
             }
 
+            const std::vector<int>& leaving_vs = leaving_vss_[i];
+
             frontier_vss_.push_back(std::vector<int>());
             std::vector<int>& vs = frontier_vss_.back();
+            remaining_vss_.push_back(std::vector<int>());
+            std::vector<int>& rs = remaining_vss_.back();
             for (std::set<int>::const_iterator itor = current_vs.begin();
                  itor != current_vs.end(); ++itor) {
 
                 vs.push_back(*itor);
+
+                bool found_leaving = false;
+                for (size_t j = 0; j < leaving_vs.size(); ++j) {
+                    int v = leaving_vs[j];
+                    if (v == *itor) {
+                        found_leaving = true;
+                        break;
+                    }
+                }
+                if (!found_leaving) {
+                    rs.push_back(*itor);
+                }
             }
 
-            const std::vector<int>& leaving_vs = leaving_vss_[i];
             for (size_t j = 0; j < leaving_vs.size(); ++j) {
                 int v = leaving_vs[j];
                 current_vs.erase(v);
                 unused.push_back(vertex_to_pos_[v]);
             }
         }
-    }
-
-    void print() {
-        for (int i = 0; i < graph_.edgeSize(); ++i) {
-            std::cout << "[";
-            for (size_t j = 0; j < entering_vss_[i].size(); ++j) {
-                std::cout << entering_vss_[i][j] << ", ";
-            }
-            std::cout << "]";
-            std::cout << "[";
-            for (size_t j = 0; j < leaving_vss_[i].size(); ++j) {
-                std::cout << leaving_vss_[i][j] << ", ";
-            }
-            std::cout << "]";
-            std::cout << "[";
-            for (size_t j = 0; j < frontier_vss_[i].size(); ++j) {
-                std::cout << frontier_vss_[i][j] << ", ";
-            }
-            std::cout << "]" << std::endl;
-        }
-
-        for (int v = 1; v <= graph_.vertexSize(); ++v) {
-            std::cout << vertex_to_pos_[v] << ", ";
-        }
-        
-        std::cout << "max f size = " << max_frontier_size_ << std::endl;
     }
 
 public:
@@ -174,6 +163,12 @@ public:
         return frontier_vss_[index];
     }
 
+    // This function returns the vector that stores ...
+    // <add comments ********>
+    const std::vector<int>& getRemainingVs(int index) const {
+        return remaining_vss_[index];
+    }
+
     // This function translates the vertex number to the position
     // in the PodArray used by FrontierExampleSpec.
     int vertexToPos(int v) const {
@@ -200,6 +195,37 @@ public:
             }
         }
         return -1;
+    }
+
+    void print() {
+        for (int i = 0; i < graph_.edgeSize(); ++i) {
+            std::cout << "[";
+            for (size_t j = 0; j < entering_vss_[i].size(); ++j) {
+                std::cout << entering_vss_[i][j] << ", ";
+            }
+            std::cout << "]";
+            std::cout << "[";
+            for (size_t j = 0; j < leaving_vss_[i].size(); ++j) {
+                std::cout << leaving_vss_[i][j] << ", ";
+            }
+            std::cout << "]";
+            std::cout << "[";
+            for (size_t j = 0; j < frontier_vss_[i].size(); ++j) {
+                std::cout << frontier_vss_[i][j] << ", ";
+            }
+            std::cout << "]";
+            std::cout << "[";
+            for (size_t j = 0; j < remaining_vss_[i].size(); ++j) {
+                std::cout << remaining_vss_[i][j] << ", ";
+            }
+            std::cout << "]" << std::endl;
+        }
+
+        for (int v = 1; v <= graph_.vertexSize(); ++v) {
+            std::cout << vertex_to_pos_[v] << ", ";
+        }
+
+        std::cout << "max f size = " << max_frontier_size_ << std::endl;
     }
 };
 

@@ -1,19 +1,19 @@
-#ifndef FRONTIER_SINGLE_CYCLE_HPP
-#define FRONTIER_SINGLE_CYCLE_HPP
+#ifndef FRONTIER_SINGLE_HAMILTONIAN_CYCLE_HPP
+#define FRONTIER_SINGLE_HAMILTONIAN_CYCLE_HPP
 
 #include <vector>
 
 using namespace tdzdd;
 
 // data associated with each vertex on the frontier
-class FrontierData {
+class FrontierDataForSHC {
 public:
     short deg;
     short comp;
 };
 
-class FrontierSingleCycleSpec
-    : public tdzdd::PodArrayDdSpec<FrontierSingleCycleSpec, FrontierData, 2> {
+class FrontierSingleHamiltonianCycleSpec
+    : public tdzdd::PodArrayDdSpec<FrontierSingleHamiltonianCycleSpec, FrontierDataForSHC, 2> {
 private:
     // input graph
     const tdzdd::Graph& graph_;
@@ -24,27 +24,30 @@ private:
 
     const FrontierManager fm_;
 
+    // the level where all vertices enter the frontier
+    const int all_entered_level_;
+
     // This function gets deg of v.
-    short getDeg(FrontierData* data, int v) const {
+    short getDeg(FrontierDataForSHC* data, int v) const {
         return data[fm_.vertexToPos(v)].deg;
     }
 
     // This function sets deg of v to be d.
-    void setDeg(FrontierData* data, int v, short d) const {
+    void setDeg(FrontierDataForSHC* data, int v, short d) const {
         data[fm_.vertexToPos(v)].deg = d;
     }
 
     // This function gets comp of v.
-    short getComp(FrontierData* data, int v) const {
+    short getComp(FrontierDataForSHC* data, int v) const {
         return data[fm_.vertexToPos(v)].comp;
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierData* data, int v, short c) const {
+    void setComp(FrontierDataForSHC* data, int v, short c) const {
         data[fm_.vertexToPos(v)].comp = c;
     }
 
-    void initializeDegComp(FrontierData* data) const {
+    void initializeDegComp(FrontierDataForSHC* data) const {
         for (int i = 0; i < fm_.getMaxFrontierSize(); ++i) {
             data[i].deg = 0;
             data[i].comp = 0;
@@ -52,21 +55,22 @@ private:
     }
 
 public:
-    FrontierSingleCycleSpec(const tdzdd::Graph& graph)
+    FrontierSingleHamiltonianCycleSpec(const tdzdd::Graph& graph)
         : graph_(graph),
           n_(graph_.vertexSize()),
           m_(graph_.edgeSize()),
-          fm_(graph_)
+          fm_(graph_),
+          all_entered_level_(m_ - fm_.getAllVerticesEnteringLevel())
     {
         setArraySize(fm_.getMaxFrontierSize());
     }
 
-    int getRoot(FrontierData* data) const {
+    int getRoot(FrontierDataForSHC* data) const {
         initializeDegComp(data);
         return m_;
     }
 
-    int getChild(FrontierData* data, int level, int value) const {
+    int getChild(FrontierDataForSHC* data, int level, int value) const {
         assert(1 <= level && level <= m_);
 
         // edge index (starting from 0)
@@ -114,13 +118,14 @@ public:
         for (size_t i = 0; i < leaving_vs.size(); ++i) {
             int v = leaving_vs[i];
 
-            // The degree of v must be 0 or 2.
-            if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
+            // The degree of v must be 2.
+            if (getDeg(data, v) != 2) {
                 return 0;
             }
 
             bool samecomp_found = false;
             bool nonisolated_found = false;
+            bool frontier_exists = false;
 
             // Search a vertex that has the component number same as that of v.
             // Also check whether a vertex whose degree is at least 1 exists
@@ -142,6 +147,7 @@ public:
                 if (found_leaved) {
                     continue;
                 }
+                frontier_exists = true;
                 // w has the component number same as that of v
                 if (getComp(data, w) == getComp(data, v)) {
                     samecomp_found = true;
@@ -158,21 +164,23 @@ public:
             // same as that of v. That is, the connected component
             // of v becomes determined.
             if (!samecomp_found) {
-                // Here, deg of v is 0 or 2.
-                assert(getDeg(data, v) == 0 || getDeg(data, v) == 2);
+                // Here, deg of v is 2.
+                assert(getDeg(data, v) == 2);
 
-                // Check whether v is isolated.
-                // If v is isolated (deg of v is 0), nothing occurs.
-                if (getDeg(data, v) > 0) {
-                    // Check whether there is a
-                    // connected component other than that of v,
-                    // that is, the generated subgraph is not connected.
-                    // If so, we return the 0-terminal.
-                    if (nonisolated_found) {
-                        return 0; // return the 0-terminal.
+                // Check whether there is a connected component
+                // other than that of v, that is, the generated subgraph
+                // is not connected.
+                // If so, we return the 0-terminal.
+                if (nonisolated_found) {
+                    return 0; // return the 0-terminal.
+                } else {
+                    // Here, a single Hamiltonian cycle is completed.
+                    if (frontier_exists) {
+                        return 0; // return the 0-terminal
+                    } else if (level > all_entered_level_) {
+                        // Some vertices have not entered the frontier yet.
+                        return 0; // return the 0-terminal
                     } else {
-                        // Here, a single cycle is completed.
-                        // Then, we return the 1-terminal.
                         return -1; // return the 1-terminal
                     }
                 }
@@ -191,4 +199,4 @@ public:
     }
 };
 
-#endif // FRONTIER_SINGLE_CYCLE_HPP
+#endif // FRONTIER_SINGLE_HAMILTONIAN_CYCLE_HPP
