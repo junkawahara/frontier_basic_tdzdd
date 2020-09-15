@@ -12,7 +12,9 @@ using namespace tdzdd;
 
 #include "FrontierManager.hpp"
 #include "FrontierSingleCycle.hpp"
+#include "FrontierSingleHamiltonianCycle.hpp"
 #include "FrontierSTPath.hpp"
+#include "FrontierForest.hpp"
 #include "FrontierTree.hpp"
 #include "FrontierMatching.hpp"
 #include "FrontierMate.hpp"
@@ -50,7 +52,7 @@ int main(int argc, char** argv) {
             tdzdd::Graph graph;
             makeGridGraph(graph, n);
             FrontierManager fm(graph);
-            FrontierSingleCycleSpec spec(graph, false);
+            FrontierSingleCycleSpec spec(graph);
             DdStructure<2> dd(spec);
             std::cerr << "n = " << n << ", # of solutions = "
                       << dd.zddCardinality();
@@ -72,6 +74,7 @@ int main(int argc, char** argv) {
         bool is_matching = false;
         bool is_cmatching = false;
         bool is_dot = false;
+        bool is_show_fs = false;
 
         bool readfirst = false;
         for (int i = 1; i < argc; ++i) {
@@ -97,6 +100,8 @@ int main(int argc, char** argv) {
                 tdzdd::MessageHandler::showMessages(true);
             } else if (std::string(argv[i]) == std::string("--dot")) {
                 is_dot = true;
+            } else if (std::string(argv[i]) == std::string("--show-fs")) {
+                is_show_fs = true;
             } else if (argv[i][0] == '-') {
                 std::cerr << "unknown option " << argv[i] << std::endl;
                 return 1;
@@ -115,6 +120,10 @@ int main(int argc, char** argv) {
 
         std::cerr << "# of vertices = " << graph.vertexSize() << std::endl;
         std::cerr << "# of edges = " << graph.edgeSize() << std::endl;
+
+        if (is_show_fs) {
+            fm.print();
+        }
 
         DdStructure<2> dd;
 
@@ -139,15 +148,18 @@ int main(int argc, char** argv) {
                                   graph.getVertex(oss.str()));
             dd = DdStructure<2>(spec);
         } else if (is_cycle) {
-            //FrontierSingleCycleSpec spec(graph, false);
-            FrontierMateSpec spec(graph, false);
+            std::cerr << "here b" << std::endl;
+            FrontierSingleCycleSpec spec(graph);
+            //FrontierMateSpec spec(graph, false);
             dd = DdStructure<2>(spec);
         } else if (is_ham_cycle) {
             //FrontierSingleCycleSpec spec(graph, true);
-            FrontierMateSpec spec(graph, true);
+            std::cerr << "here a" << std::endl;
+            FrontierSingleHamiltonianCycleSpec spec(graph);
+            //FrontierMateSpec spec(graph, true);
             dd = DdStructure<2>(spec);
         } else if (is_forest) {
-            FrontierTreeSpec spec(graph, false, false);
+            FrontierForestSpec spec(graph);
             dd = DdStructure<2>(spec);
         } else if (is_tree) {
             FrontierTreeSpec spec(graph, true, false);
