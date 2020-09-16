@@ -19,7 +19,6 @@ private:
     // number of edges
     const int m_;
 
-    const bool isTree_; // forest if false
     const bool isSpanning_;
 
     const FrontierManager fm_;
@@ -58,18 +57,12 @@ private:
 
 public:
     FrontierTreeSpec(const tdzdd::Graph& graph,
-                     bool isTree, bool isSpanning) : graph_(graph),
-                                                     n_(graph_.vertexSize()),
-                                                     m_(graph_.edgeSize()),
-                                                     isTree_(isTree),
-                                                     isSpanning_(isSpanning),
-                                                     fm_(graph_)
+                     bool isSpanning) : graph_(graph),
+                                        n_(graph_.vertexSize()),
+                                        m_(graph_.edgeSize()),
+                                        isSpanning_(isSpanning),
+                                        fm_(graph_)
     {
-        if (!isTree_ && isSpanning) {
-            std::cerr << "(isTree, isSpanning) = (false, true) is illegal"
-                      << std::endl;
-            exit(1);
-        }
         if (n_ >= (1 << 15)) {
             std::cerr << "The number of vertices must be smaller than 2^15."
                       << std::endl;
@@ -140,90 +133,85 @@ public:
                 }
             }
 
-            if (isTree_) {
-                // The degree of v must be 0 or 2.
-                //if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
-                //    return 0;
-                //}
-                bool comp_found = false;
-                bool deg_found = false;
-                bool frontier_exists = false;
-                // Search a vertex that has the component number same as that of v.
-                // Also check whether a vertex whose degree is at least 1 exists
-                // on the frontier.
-                for (size_t j = 0; j < frontier_vs.size(); ++j) {
-                    int w = frontier_vs[j];
-                    if (w == v) { // skip if w is the leaving vertex
-                        continue;
-                    }
-                    // skip if w is one of the vertices that
-                    // has already leaved the frontier
-                    bool found_leaved = false;
-                    for (size_t k = 0; k < i; ++k) {
-                        if (w == leaving_vs[k]) {
-                            found_leaved = true;
-                            break;
-                        }
-                    }
-                    if (found_leaved) {
-                        continue;
-                    }
-                    frontier_exists = true;
-                    // w has the component number same as that of v
-                    if (getComp(data, w) == getComp(data, v)) {
-                        comp_found = true;
-                    }
-                    // The degree of w is at least 1.
-                    if (getDeg(data, w)) {
-                        deg_found = true;
-                    }
-                    if (deg_found && comp_found) {
+            // The degree of v must be 0 or 2.
+            //if (getDeg(data, v) != 0 && getDeg(data, v) != 2) {
+            //    return 0;
+            //}
+            bool comp_found = false;
+            bool deg_found = false;
+            bool frontier_exists = false;
+            // Search a vertex that has the component number same as that of v.
+            // Also check whether a vertex whose degree is at least 1 exists
+            // on the frontier.
+            for (size_t j = 0; j < frontier_vs.size(); ++j) {
+                int w = frontier_vs[j];
+                if (w == v) { // skip if w is the leaving vertex
+                    continue;
+                }
+                // skip if w is one of the vertices that
+                // has already leaved the frontier
+                bool found_leaved = false;
+                for (size_t k = 0; k < i; ++k) {
+                    if (w == leaving_vs[k]) {
+                        found_leaved = true;
                         break;
                     }
                 }
-                // There is no vertex that has the component number
-                // same as that of v. That is, the connected component
-                // of v becomes determined.
-                if (!comp_found) {
-                    // Here, deg of v is 0 or 2. If deg of v is 0,
-                    // this means that v is isolated.
-                    // If deg of v is 2, and there is a vertex whose
-                    // deg is at least 1, this means that there is a
-                    // connected component other than that of v.
-                    // That is, the generated subgraph is not connected.
-                    // Then, we return the 0-terminal.
-                    //assert(getDeg(data, v) == 0 || getDeg(data, v) == 2);
-                    if (getDeg(data, v) && deg_found) {
-                        return 0; // return the 0-terminal.
-                    } else if (getDeg(data, v)) { // If deg of v is 2,
-                        // and there is no vertex whose deg is at least 1
-                        // a single cycle is completed.
-                        // Then, we return the 1-terminal
-                        
-                        if (isSpanning_) {
-                            if (frontier_exists) {
-                                return 0;
-                            } else {
-                                return -1; // return the 1-terminal
-                            }
+                if (found_leaved) {
+                    continue;
+                }
+                frontier_exists = true;
+                // w has the component number same as that of v
+                if (getComp(data, w) == getComp(data, v)) {
+                    comp_found = true;
+                }
+                // The degree of w is at least 1.
+                if (getDeg(data, w)) {
+                    deg_found = true;
+                }
+                if (deg_found && comp_found) {
+                    break;
+                }
+            }
+            // There is no vertex that has the component number
+            // same as that of v. That is, the connected component
+            // of v becomes determined.
+            if (!comp_found) {
+                // Here, deg of v is 0 or 2. If deg of v is 0,
+                // this means that v is isolated.
+                // If deg of v is 2, and there is a vertex whose
+                // deg is at least 1, this means that there is a
+                // connected component other than that of v.
+                // That is, the generated subgraph is not connected.
+                // Then, we return the 0-terminal.
+                //assert(getDeg(data, v) == 0 || getDeg(data, v) == 2);
+                if (getDeg(data, v) && deg_found) {
+                    return 0; // return the 0-terminal.
+                } else if (getDeg(data, v)) { // If deg of v is 2,
+                    // and there is no vertex whose deg is at least 1
+                    // a single cycle is completed.
+                    // Then, we return the 1-terminal
+
+                    if (isSpanning_) {
+                        if (frontier_exists) {
+                            return 0;
                         } else {
                             return -1; // return the 1-terminal
                         }
+                    } else {
+                        return -1; // return the 1-terminal
                     }
                 }
             }
+
             // Since deg and comp of v are never used until the end,
             // we erase the values.
             resetDeg(data, v);
             setComp(data, v, 0);
         }
         if (level == 1) {
-            if (isTree_) {
-                // If we come here, the edge set is empty (taking no edge).
-                return 0;
-            } else {
-                return -1;
-            }
+            // If we come here, the edge set is empty (taking no edge).
+            return 0;
         }
         /*std::cerr << "level = " << level << ", value = " << value << ", ";
         for (size_t i = 0; i < frontier_vs.size(); ++i) {

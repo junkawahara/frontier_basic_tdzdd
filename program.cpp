@@ -148,13 +148,11 @@ int main(int argc, char** argv) {
                                   graph.getVertex(oss.str()));
             dd = DdStructure<2>(spec);
         } else if (is_cycle) {
-            std::cerr << "here b" << std::endl;
             FrontierSingleCycleSpec spec(graph);
             //FrontierMateSpec spec(graph, false);
             dd = DdStructure<2>(spec);
         } else if (is_ham_cycle) {
             //FrontierSingleCycleSpec spec(graph, true);
-            std::cerr << "here a" << std::endl;
             FrontierSingleHamiltonianCycleSpec spec(graph);
             //FrontierMateSpec spec(graph, true);
             dd = DdStructure<2>(spec);
@@ -162,10 +160,10 @@ int main(int argc, char** argv) {
             FrontierForestSpec spec(graph);
             dd = DdStructure<2>(spec);
         } else if (is_tree) {
-            FrontierTreeSpec spec(graph, true, false);
+            FrontierTreeSpec spec(graph, false);
             dd = DdStructure<2>(spec);
         } else if (is_stree) {
-            FrontierTreeSpec spec(graph, true, true);
+            FrontierTreeSpec spec(graph, true);
             dd = DdStructure<2>(spec);
         } else if (is_matching) {
             FrontierMatchingSpec spec(graph, false);
