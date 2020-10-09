@@ -68,6 +68,11 @@ int main(int argc, char** argv) {
         bool is_ham_path = false;
         bool is_cycle = false;
         bool is_ham_cycle = false;
+        bool is_path_m = false;
+        bool is_ham_path_m = false;
+        bool is_cycle_m = false;
+        bool is_ham_cycle_m = false;
+
         bool is_forest = false;
         bool is_tree = false;
         bool is_stree = false;
@@ -86,6 +91,14 @@ int main(int argc, char** argv) {
                 is_cycle = true;
             } else if (std::string(argv[i]) == std::string("--hamcycle")) {
                 is_ham_cycle = true;
+            } else if (std::string(argv[i]) == std::string("--path_m")) {
+                is_path_m = true;
+            } else if (std::string(argv[i]) == std::string("--hampath_m")) {
+                is_ham_path_m = true;
+            } else if (std::string(argv[i]) == std::string("--cycle_m")) {
+                is_cycle_m = true;
+            } else if (std::string(argv[i]) == std::string("--hamcycle_m")) {
+                is_ham_cycle_m = true;
             } else if (std::string(argv[i]) == std::string("--forest")) {
                 is_forest = true;
             } else if (std::string(argv[i]) == std::string("--tree")) {
@@ -127,34 +140,33 @@ int main(int argc, char** argv) {
 
         DdStructure<2> dd;
 
+        std::ostringstream oss;
+        oss << graph.vertexSize();
+        const int endPoint = graph.getVertex(oss.str());
+
         if (is_path) {
-            std::ostringstream oss;
-            oss << graph.vertexSize();
-            //FrontierSTPathSpec spec(graph, false,
-            //                        graph.getVertex("1"),
-            //                        graph.getVertex(oss.str()));
-            FrontierMateSpec spec(graph, false,
-                                  graph.getVertex("1"),
-                                  graph.getVertex(oss.str()));
+            FrontierSTPathSpec spec(graph, false, graph.getVertex("1"), endPoint);
             dd = DdStructure<2>(spec);
         } else if (is_ham_path) {
-            std::ostringstream oss;
-            oss << graph.vertexSize();
-            //FrontierSTPathSpec spec(graph, true,
-            //                        graph.getVertex("1"),
-            //                        graph.getVertex(oss.str()));
-            FrontierMateSpec spec(graph, true,
-                                  graph.getVertex("1"),
-                                  graph.getVertex(oss.str()));
+            FrontierSTPathSpec spec(graph, true, graph.getVertex("1"), endPoint);
             dd = DdStructure<2>(spec);
         } else if (is_cycle) {
             FrontierSingleCycleSpec spec(graph);
-            //FrontierMateSpec spec(graph, false);
             dd = DdStructure<2>(spec);
         } else if (is_ham_cycle) {
-            //FrontierSingleCycleSpec spec(graph, true);
             FrontierSingleHamiltonianCycleSpec spec(graph);
-            //FrontierMateSpec spec(graph, true);
+            dd = DdStructure<2>(spec);
+        } else if (is_path_m) {
+            FrontierMateSpec spec(graph, false, graph.getVertex("1"), endPoint);
+            dd = DdStructure<2>(spec);
+        } else if (is_ham_path_m) {
+            FrontierMateSpec spec(graph, true, graph.getVertex("1"), endPoint);
+            dd = DdStructure<2>(spec);
+        } else if (is_cycle_m) {
+            FrontierMateSpec spec(graph, false);
+            dd = DdStructure<2>(spec);
+        } else if (is_ham_cycle_m) {
+            FrontierMateSpec spec(graph, true);
             dd = DdStructure<2>(spec);
         } else if (is_forest) {
             FrontierForestSpec spec(graph);
