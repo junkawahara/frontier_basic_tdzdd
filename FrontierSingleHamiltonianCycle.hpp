@@ -2,6 +2,7 @@
 #define FRONTIER_SINGLE_HAMILTONIAN_CYCLE_HPP
 
 #include <vector>
+#include <climits>
 
 using namespace tdzdd;
 
@@ -18,7 +19,7 @@ private:
     // input graph
     const tdzdd::Graph& graph_;
     // number of vertices
-    const int n_;
+    const short n_;
     // number of edges
     const int m_;
 
@@ -28,22 +29,22 @@ private:
     const int all_entered_level_;
 
     // This function gets deg of v.
-    short getDeg(FrontierDataForSHC* data, int v) const {
+    short getDeg(FrontierDataForSHC* data, short v) const {
         return data[fm_.vertexToPos(v)].deg;
     }
 
     // This function sets deg of v to be d.
-    void setDeg(FrontierDataForSHC* data, int v, short d) const {
+    void setDeg(FrontierDataForSHC* data, short v, short d) const {
         data[fm_.vertexToPos(v)].deg = d;
     }
 
     // This function gets comp of v.
-    short getComp(FrontierDataForSHC* data, int v) const {
+    short getComp(FrontierDataForSHC* data, short v) const {
         return data[fm_.vertexToPos(v)].comp;
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierDataForSHC* data, int v, short c) const {
+    void setComp(FrontierDataForSHC* data, short v, short c) const {
         data[fm_.vertexToPos(v)].comp = c;
     }
 
@@ -57,11 +58,16 @@ private:
 public:
     FrontierSingleHamiltonianCycleSpec(const tdzdd::Graph& graph)
         : graph_(graph),
-          n_(graph_.vertexSize()),
+          n_(static_cast<short>(graph_.vertexSize())),
           m_(graph_.edgeSize()),
           fm_(graph_),
           all_entered_level_(m_ - fm_.getAllVerticesEnteringLevel())
     {
+        if (graph_.vertexSize() > SHRT_MAX) { // SHRT_MAX == 32767
+            std::cerr << "The number of vertices should be at most "
+                      << SHRT_MAX << std::endl;
+            exit(1);
+        }
         setArraySize(fm_.getMaxFrontierSize());
     }
 
@@ -97,11 +103,11 @@ public:
             setDeg(data, edge.v1, getDeg(data, edge.v1) + 1);
             setDeg(data, edge.v2, getDeg(data, edge.v2) + 1);
 
-            int c1 = getComp(data, edge.v1);
-            int c2 = getComp(data, edge.v2);
+            short c1 = getComp(data, edge.v1);
+            short c2 = getComp(data, edge.v2);
             if (c1 != c2) { // connected components c1 and c2 become connected
-                int cmin = std::min(c1, c2);
-                int cmax = std::max(c1, c2);
+                short cmin = std::min(c1, c2);
+                short cmax = std::max(c1, c2);
 
                 // replace component number cmin with cmax
                 for (size_t i = 0; i < frontier_vs.size(); ++i) {

@@ -2,6 +2,7 @@
 #define FRONTIER_MATE_HPP
 
 #include <vector>
+#include <climits>
 
 using namespace tdzdd;
 
@@ -14,7 +15,7 @@ private:
     // input graph
     const tdzdd::Graph& graph_;
     // number of vertices
-    const int n_;
+    const short n_;
     // number of edges
     const int m_;
 
@@ -22,8 +23,8 @@ private:
     const bool isHamiltonian_;
 
     // endpoints of a path
-    const int s_;
-    const int t_;
+    const short s_;
+    const short t_;
 
     const FrontierManager fm_;
 
@@ -31,11 +32,11 @@ private:
     const int t_entered_level_;
     const int all_entered_level_;
 
-    short getMate(FrontierMate* data, int v) const {
+    short getMate(FrontierMate* data, short v) const {
         return data[fm_.vertexToPos(v)];
     }
 
-    void setMate(FrontierMate* data, int v, short d) const {
+    void setMate(FrontierMate* data, short v, short d) const {
         data[fm_.vertexToPos(v)] = d;
     }
 
@@ -45,7 +46,7 @@ private:
         }
     }
 
-    int computeEnteredLevel(int v) const {
+    int computeEnteredLevel(short v) const {
         if (isCycle_) {
             return -1; // This value is never used.
         } else {
@@ -58,7 +59,7 @@ public:
     FrontierMateSpec(const tdzdd::Graph& graph,
                      bool isHamiltonian)
         : graph_(graph),
-          n_(graph_.vertexSize()),
+          n_(static_cast<short>(graph_.vertexSize())),
           m_(graph_.edgeSize()),
           isCycle_(true),
           isHamiltonian_(isHamiltonian),
@@ -69,6 +70,11 @@ public:
           t_entered_level_(-1),
           all_entered_level_(m_ - fm_.getAllVerticesEnteringLevel())
     {
+        if (graph_.vertexSize() > SHRT_MAX) { // SHRT_MAX == 32767
+            std::cerr << "The number of vertices should be at most "
+                      << SHRT_MAX << std::endl;
+            exit(1);
+        }
         setArraySize(fm_.getMaxFrontierSize());
     }
 
@@ -76,7 +82,7 @@ public:
     FrontierMateSpec(const tdzdd::Graph& graph,
                      bool isHamiltonian, int s, int t)
         : graph_(graph),
-          n_(graph_.vertexSize()),
+          n_(static_cast<short>(graph_.vertexSize())),
           m_(graph_.edgeSize()),
           isCycle_(false),
           isHamiltonian_(isHamiltonian),
@@ -87,6 +93,11 @@ public:
           t_entered_level_(computeEnteredLevel(t)),
           all_entered_level_(m_ - fm_.getAllVerticesEnteringLevel())
     {
+        if (graph_.vertexSize() > SHRT_MAX) { // SHRT_MAX == 32767
+            std::cerr << "The number of vertices should be at most "
+                      << SHRT_MAX << std::endl;
+            exit(1);
+        }
         setArraySize(fm_.getMaxFrontierSize());
     }
 
@@ -162,8 +173,8 @@ public:
                 return -1; // return the 1-terminal
             }
 
-            int sm = getMate(data, edge.v1);
-            int dm = getMate(data, edge.v2);
+            short sm = getMate(data, edge.v1);
+            short dm = getMate(data, edge.v2);
 
             setMate(data, edge.v1, 0);
             setMate(data, edge.v2, 0);

@@ -2,6 +2,7 @@
 #define FRONTIER_FOREST_HPP
 
 #include <vector>
+#include <climits>
 
 using namespace tdzdd;
 
@@ -15,19 +16,19 @@ private:
     // input graph
     const tdzdd::Graph& graph_;
     // number of vertices
-    const int n_;
+    const short n_;
     // number of edges
     const int m_;
 
     const FrontierManager fm_;
 
     // This function gets comp of v.
-    ushort getComp(FrontierForestData* data, int v) const {
+    ushort getComp(FrontierForestData* data, short v) const {
         return data[fm_.vertexToPos(v)];
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierForestData* data, int v, ushort c) const {
+    void setComp(FrontierForestData* data, short v, ushort c) const {
         data[fm_.vertexToPos(v)] = c;
     }
 
@@ -40,7 +41,7 @@ private:
 public:
     FrontierForestSpec(const tdzdd::Graph& graph)
         : graph_(graph),
-          n_(graph_.vertexSize()),
+          n_(static_cast<short>(graph_.vertexSize())),
           m_(graph_.edgeSize()),
           fm_(graph_)
     {

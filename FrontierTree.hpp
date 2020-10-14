@@ -2,6 +2,7 @@
 #define FRONTIER_TREE_HPP
 
 #include <vector>
+#include <climits>
 
 using namespace tdzdd;
 
@@ -15,7 +16,7 @@ private:
     // input graph
     const tdzdd::Graph& graph_;
     // number of vertices
-    const int n_;
+    const short n_;
     // number of edges
     const int m_;
 
@@ -24,27 +25,27 @@ private:
     const FrontierManager fm_;
 
     // This function gets whether the degree of v is at least 1 or not.
-    bool getDeg(FrontierTreeData* data, int v) const {
+    bool getDeg(FrontierTreeData* data, short v) const {
         return ((data[fm_.vertexToPos(v)] >> 15) & 1u) != 0;
     }
 
     // This function sets deg of v to be d.
-    void setDeg(FrontierTreeData* data, int v) const {
+    void setDeg(FrontierTreeData* data, short v) const {
         data[fm_.vertexToPos(v)] |= (1u << 15);
     }
 
     // This function sets deg of v to be d.
-    void resetDeg(FrontierTreeData* data, int v) const {
+    void resetDeg(FrontierTreeData* data, short v) const {
         data[fm_.vertexToPos(v)] &= ~(1u << 15);
     }
 
     // This function gets comp of v.
-    ushort getComp(FrontierTreeData* data, int v) const {
+    ushort getComp(FrontierTreeData* data, short v) const {
         return data[fm_.vertexToPos(v)] & 0x7fffu;
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierTreeData* data, int v, ushort c) const {
+    void setComp(FrontierTreeData* data, short v, ushort c) const {
         assert(c < 0x8000u);
         data[fm_.vertexToPos(v)] = (0x8000u & data[fm_.vertexToPos(v)]) | c;
     }
@@ -213,13 +214,6 @@ public:
             // If we come here, the edge set is empty (taking no edge).
             return 0;
         }
-        /*std::cerr << "level = " << level << ", value = " << value << ", ";
-        for (size_t i = 0; i < frontier_vs.size(); ++i) {
-            int v = frontier_vs[i];
-            std::cerr << v << ": " << (getDeg(data, v) ? "1": "0") << "," << getComp(data, v) << "  ";
-        }
-
-        std::cerr << std::endl;*/
 
         assert(level - 1 > 0);
         return level - 1;

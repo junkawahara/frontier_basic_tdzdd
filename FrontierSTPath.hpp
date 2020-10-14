@@ -2,6 +2,7 @@
 #define FRONTIER_ST_PATH_HPP
 
 #include <vector>
+#include <climits>
 
 using namespace tdzdd;
 
@@ -18,15 +19,15 @@ private:
     // input graph
     const tdzdd::Graph& graph_;
     // number of vertices
-    const int n_;
+    const short n_;
     // number of edges
     const int m_;
 
     const bool isHamiltonian_;
 
     // endpoints of a path
-    const int s_;
-    const int t_;
+    const short s_;
+    const short t_;
 
     const FrontierManager fm_;
 
@@ -34,22 +35,22 @@ private:
     const int t_entered_level_;
 
     // This function gets deg of v.
-    short getDeg(FrontierData2* data, int v) const {
+    short getDeg(FrontierData2* data, short v) const {
         return data[fm_.vertexToPos(v)].deg;
     }
 
     // This function sets deg of v to be d.
-    void setDeg(FrontierData2* data, int v, short d) const {
+    void setDeg(FrontierData2* data, short v, short d) const {
         data[fm_.vertexToPos(v)].deg = d;
     }
 
     // This function gets comp of v.
-    short getComp(FrontierData2* data, int v) const {
+    short getComp(FrontierData2* data, short v) const {
         return data[fm_.vertexToPos(v)].comp;
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierData2* data, int v, short c) const {
+    void setComp(FrontierData2* data, short v, short c) const {
         data[fm_.vertexToPos(v)].comp = c;
     }
 
@@ -60,15 +61,15 @@ private:
         }
     }
 
-    int computeEnteredLevel(int v) const {
+    int computeEnteredLevel(short v) const {
         return m_ - fm_.getVerticesEnteringLevel(v);
     }
 
 public:
     FrontierSTPathSpec(const tdzdd::Graph& graph,
-                       bool isHamiltonian, int s, int t)
+                       bool isHamiltonian, short s, short t)
         : graph_(graph),
-          n_(graph_.vertexSize()),
+          n_(static_cast<short>(graph_.vertexSize())),
           m_(graph_.edgeSize()),
           isHamiltonian_(isHamiltonian),
           s_(s),
@@ -77,6 +78,11 @@ public:
           s_entered_level_(computeEnteredLevel(s)),
           t_entered_level_(computeEnteredLevel(t))
     {
+        if (graph_.vertexSize() > SHRT_MAX) { // SHRT_MAX == 32767
+            std::cerr << "The number of vertices should be at most "
+                      << SHRT_MAX << std::endl;
+            exit(1);
+        }
         setArraySize(fm_.getMaxFrontierSize());
     }
 
@@ -112,11 +118,11 @@ public:
             setDeg(data, edge.v1, getDeg(data, edge.v1) + 1);
             setDeg(data, edge.v2, getDeg(data, edge.v2) + 1);
 
-            int c1 = getComp(data, edge.v1);
-            int c2 = getComp(data, edge.v2);
+            short c1 = getComp(data, edge.v1);
+            short c2 = getComp(data, edge.v2);
             if (c1 != c2) { // connected components c1 and c2 become connected
-                int cmin = std::min(c1, c2);
-                int cmax = std::max(c1, c2);
+                short cmin = std::min(c1, c2);
+                short cmax = std::max(c1, c2);
 
                 // replace component number cmin with cmax
                 for (size_t i = 0; i < frontier_vs.size(); ++i) {

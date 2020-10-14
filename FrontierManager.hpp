@@ -171,11 +171,11 @@ public:
 
     // This function translates the vertex number to the position
     // in the PodArray used by FrontierExampleSpec.
-    int vertexToPos(int v) const {
+    int vertexToPos(short v) const {
         return vertex_to_pos_[v];
     }
 
-    int getVerticesEnteringLevel(int v) const {
+    int getVerticesEnteringLevel(short v) const {
         for (size_t i = 0; i < entering_vss_.size(); ++i) {
             for (size_t j = 0; j < entering_vss_[i].size(); ++j) {
                 if (entering_vss_[i][j] == v) {
