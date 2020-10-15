@@ -18,6 +18,7 @@ using namespace tdzdd;
 #include "FrontierTree.hpp"
 #include "FrontierMatching.hpp"
 #include "FrontierMate.hpp"
+#include "FrontierDegreeSpecified.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
@@ -78,6 +79,8 @@ int main(int argc, char** argv) {
         bool is_stree = false;
         bool is_matching = false;
         bool is_cmatching = false;
+        bool is_deg_sp = false;
+
         bool is_dot = false;
         bool is_show_fs = false;
 
@@ -109,6 +112,8 @@ int main(int argc, char** argv) {
                 is_matching = true;
             } else if (std::string(argv[i]) == std::string("--cmatching")) {
                 is_cmatching = true;
+            } else if (std::string(argv[i]) == std::string("--deg_sp")) {
+                is_deg_sp = true;
             } else if (std::string(argv[i]) == std::string("--show")) {
                 tdzdd::MessageHandler::showMessages(true);
             } else if (std::string(argv[i]) == std::string("--dot")) {
@@ -182,6 +187,14 @@ int main(int argc, char** argv) {
             dd = DdStructure<2>(spec);
         } else if (is_cmatching) {
             FrontierMatchingSpec spec(graph, true);
+            dd = DdStructure<2>(spec);
+        } else if (is_deg_sp) {
+            std::vector<IntSubset*> degRanges;
+            degRanges.push_back(new IntRange(0, INT_MAX));
+            degRanges.push_back(new IntRange(1, 1));
+            degRanges.push_back(new IntRange(0, INT_MAX));
+            degRanges.push_back(new IntRange(1, 1));
+            FrontierDegreeSpecifiedSpec spec(graph, degRanges);
             dd = DdStructure<2>(spec);
         } else {
             std::cerr << "Please specify a kind of subgraphs." << std::endl;
