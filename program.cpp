@@ -79,7 +79,8 @@ int main(int argc, char** argv) {
         bool is_stree = false;
         bool is_matching = false;
         bool is_cmatching = false;
-        bool is_deg_sp = false;
+        bool is_letter_I = false;
+        bool is_letter_P = false;
 
         bool is_dot = false;
         bool is_show_fs = false;
@@ -90,7 +91,8 @@ int main(int argc, char** argv) {
                 is_path = true;
             } else if (std::string(argv[i]) == std::string("--hampath")) {
                 is_ham_path = true;
-            } else if (std::string(argv[i]) == std::string("--cycle")) {
+            } else if (std::string(argv[i]) == std::string("--cycle") ||
+                       std::string(argv[i]) == std::string("--letter_O")) {
                 is_cycle = true;
             } else if (std::string(argv[i]) == std::string("--hamcycle")) {
                 is_ham_cycle = true;
@@ -112,8 +114,11 @@ int main(int argc, char** argv) {
                 is_matching = true;
             } else if (std::string(argv[i]) == std::string("--cmatching")) {
                 is_cmatching = true;
-            } else if (std::string(argv[i]) == std::string("--deg_sp")) {
-                is_deg_sp = true;
+            } else if (std::string(argv[i]) == std::string("--letter_I") ||
+                       std::string(argv[i]) == std::string("--letter_L")) {
+                is_letter_I = true;
+            } else if (std::string(argv[i]) == std::string("--letter_P")) {
+                is_letter_P = true;
             } else if (std::string(argv[i]) == std::string("--show")) {
                 tdzdd::MessageHandler::showMessages(true);
             } else if (std::string(argv[i]) == std::string("--dot")) {
@@ -188,7 +193,14 @@ int main(int argc, char** argv) {
         } else if (is_cmatching) {
             FrontierMatchingSpec spec(graph, true);
             dd = DdStructure<2>(spec);
-        } else if (is_deg_sp) {
+        } else if (is_letter_I) {
+            std::vector<IntSubset*> degRanges;
+            degRanges.push_back(new IntRange(0, INT_MAX));
+            degRanges.push_back(new IntRange(2, 2));
+            degRanges.push_back(new IntRange(0, INT_MAX));
+            FrontierDegreeSpecifiedSpec spec(graph, degRanges);
+            dd = DdStructure<2>(spec);
+        } else if (is_letter_P) {
             std::vector<IntSubset*> degRanges;
             degRanges.push_back(new IntRange(0, INT_MAX));
             degRanges.push_back(new IntRange(1, 1));
