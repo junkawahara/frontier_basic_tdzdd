@@ -19,6 +19,7 @@ using namespace tdzdd;
 #include "FrontierMatching.hpp"
 #include "FrontierMate.hpp"
 #include "FrontierDegreeSpecified.hpp"
+#include "FrontierTwoSingleCycles.hpp"
 
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
@@ -68,6 +69,7 @@ int main(int argc, char** argv) {
         bool is_path = false;
         bool is_ham_path = false;
         bool is_cycle = false;
+        bool is_cycle2 = false;
         bool is_ham_cycle = false;
         bool is_path_m = false;
         bool is_ham_path_m = false;
@@ -94,6 +96,9 @@ int main(int argc, char** argv) {
             } else if (std::string(argv[i]) == std::string("--cycle") ||
                        std::string(argv[i]) == std::string("--letter_O")) {
                 is_cycle = true;
+            } else if (std::string(argv[i]) == std::string("--cycle2") ||
+                       std::string(argv[i]) == std::string("--letter_O")) {
+                is_cycle2 = true;
             } else if (std::string(argv[i]) == std::string("--hamcycle")) {
                 is_ham_cycle = true;
             } else if (std::string(argv[i]) == std::string("--path_m")) {
@@ -163,6 +168,12 @@ int main(int argc, char** argv) {
         } else if (is_cycle) {
             FrontierSingleCycleSpec spec(graph);
             dd = DdStructure<2>(spec);
+        } else if (is_cycle2) {
+            FrontierTwoSingleCyclesSpec spec(graph);
+            DdStructure<3> dd3 = DdStructure<3>(spec);
+            std::cerr << "# of ZDD nodes = " << dd3.size() << std::endl;
+            std::cerr << "# of solutions = ??? (cannot be computed in the current version)"<< std::endl;
+            return 0;
         } else if (is_ham_cycle) {
             FrontierSingleHamiltonianCycleSpec spec(graph);
             dd = DdStructure<2>(spec);
