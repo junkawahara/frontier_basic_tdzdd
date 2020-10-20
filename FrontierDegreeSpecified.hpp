@@ -8,7 +8,8 @@
 
 using namespace tdzdd;
 
-typedef short FrontierDSData;
+typedef unsigned char uchar;
+typedef unsigned char FrontierDSData;
 
 class FrontierDegreeSpecifiedSpec
     : public tdzdd::PodArrayDdSpec<FrontierDegreeSpecifiedSpec, FrontierDSData, 2> {
@@ -16,7 +17,7 @@ private:
     // input graph
     const tdzdd::Graph& graph_;
     // number of vertices
-    const short n_;
+    const int n_;
     // number of edges
     const int m_;
 
@@ -27,23 +28,25 @@ private:
     const std::vector<bool> storingList_;
 
     // This function gets deg of v.
-    short getDeg(FrontierDSData* data, short v) const {
-        return data[fm_.vertexToPos(v) * 2];
+    int getDeg(FrontierDSData* data, int v) const {
+        return static_cast<int>(data[fm_.vertexToPos(v) * 2]);
     }
 
     // This function sets deg of v to be d.
-    void setDeg(FrontierDSData* data, short v, short d) const {
-        data[fm_.vertexToPos(v) * 2] = d;
+    void setDeg(FrontierDSData* data, int v, int d) const {
+        data[fm_.vertexToPos(v) * 2] = static_cast<uchar>(d);
     }
 
     // This function gets comp of v.
-    short getComp(FrontierDSData* data, short v) const {
-        return data[fm_.vertexToPos(v) * 2 + 1];
+    int getComp(FrontierDSData* data, int v, int index) const {
+        return fm_.posToVertex(index, data[fm_.vertexToPos(v) * 2 + 1]);
+        //return data[fm_.vertexToPos(v) * 2 + 1];
     }
 
     // This function sets comp of v to be c.
-    void setComp(FrontierDSData* data, short v, short c) const {
-        data[fm_.vertexToPos(v) * 2 + 1] = c;
+    void setComp(FrontierDSData* data, int v, int c) const {
+        data[fm_.vertexToPos(v) * 2 + 1] = fm_.vertexToPos(c);
+        //data[fm_.vertexToPos(v) * 2 + 1] = c;
     }
 
     void incrementFixedDeg(FrontierDSData* data, int d) const {
@@ -75,7 +78,7 @@ private:
     }
 
     void initializeData(FrontierDSData* data) const {
-        for (int i = 0; i < fixedDegStart_ + degRanges_.size(); ++i) {
+        for (int i = 0; i < fixedDegStart_ + static_cast<int>(degRanges_.size()); ++i) {
             data[i] = 0;
         }
     }
@@ -109,6 +112,9 @@ public:
                       << SHRT_MAX << std::endl;
             exit(1);
         }
+
+        // todo: check all the degrees is at most 256
+
         setArraySize(fixedDegStart_ + degRanges_.size());
     }
 
@@ -123,7 +129,7 @@ public:
         //std::cerr << "level = " << level << ", value = " << value << std::endl;
 
         // edge index (starting from 0)
-        int edge_index = m_ - level;
+        const int edge_index = m_ - level;
         // edge that we are processing.
         // The endpoints of "edge" are edge.v1 and edge.v2.
         const Graph::EdgeInfo& edge = graph_.edgeInfo(edge_index);
@@ -154,8 +160,8 @@ public:
             setDeg(data, edge.v1, getDeg(data, edge.v1) + 1);
             setDeg(data, edge.v2, getDeg(data, edge.v2) + 1);
 
-            short c1 = getComp(data, edge.v1);
-            short c2 = getComp(data, edge.v2);
+            short c1 = getComp(data, edge.v1, edge_index);
+            short c2 = getComp(data, edge.v2, edge_index);
             if (c1 != c2) { // connected components c1 and c2 become connected
                 short cmin = std::min(c1, c2);
                 short cmax = std::max(c1, c2);
@@ -163,7 +169,7 @@ public:
                 // replace component number cmin with cmax
                 for (size_t i = 0; i < frontier_vs.size(); ++i) {
                     int v = frontier_vs[i];
-                    if (getComp(data, v) == cmin) {
+                    if (getComp(data, v, edge_index) == cmin) {
                         setComp(data, v, cmax);
                     }
                 }
@@ -207,7 +213,7 @@ public:
                     continue;
                 }
                 // w has the component number same as that of v
-                if (getComp(data, w) == getComp(data, v)) {
+                if (getComp(data, w, edge_index) == getComp(data, v, edge_index)) {
                     samecomp_found = true;
                 }
                 // The degree of w is at least 1.
