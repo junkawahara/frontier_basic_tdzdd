@@ -74,9 +74,6 @@ public:
             resetUsed(data, v);
         }
 
-        // vertices on the frontier
-        const std::vector<int>& frontier_vs = fm_.getFrontierVs(edge_index);
-
         if (value == 1) { // if we take the edge (go to 1-arc)
             if (getUsed(data, edge.v1)) {
                 return 0;

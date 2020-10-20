@@ -80,7 +80,7 @@ public:
         assert(1 <= level && level <= m_);
 
         // edge index (starting from 0)
-        int edge_index = m_ - level;
+        const int edge_index = m_ - level;
         // edge that we are processing.
         // The endpoints of "edge" are edge.v1 and edge.v2.
         const Graph::EdgeInfo& edge = graph_.edgeInfo(edge_index);

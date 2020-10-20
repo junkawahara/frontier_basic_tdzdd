@@ -33,6 +33,7 @@ private:
 
     // translate the vertex number to the position in the PodArray
     std::vector<int> vertex_to_pos_;
+    std::vector<std::vector<int> > pos_to_vertex_;
 
     // the maximum frontier size
     int max_frontier_size_;
@@ -57,7 +58,7 @@ private:
                 entered_vs.insert(e.v2);
             }
         }
-        assert(entered_vs.size() == n);
+        assert(static_cast<int>(entered_vs.size()) == n);
 
         // compute leaving_vss_
         std::set<int> leaved_vs;
@@ -72,7 +73,7 @@ private:
                 leaved_vs.insert(e.v2);
             }
         }
-        assert(leaved_vs.size() == n);
+        assert(static_cast<int>(leaved_vs.size()) == n);
     }
 
     void construct() {
@@ -88,8 +89,18 @@ private:
         }
 
         vertex_to_pos_.resize(n + 1);
+        pos_to_vertex_.resize(m);
+        for (int i = 0; i < m; ++i) {
+            pos_to_vertex_[i].resize(n + 1);
+        }
+
         std::set<int> current_vs;
         for (int i = 0; i < m; ++i) {
+            if (i > 0) {
+                for (int j = 0; j < n + 1; ++j) {
+                    pos_to_vertex_[i][j] = pos_to_vertex_[i - 1][j];
+                }
+            }
             const std::vector<int>& entering_vs = entering_vss_[i];
             for (size_t j = 0; j < entering_vs.size(); ++j) {
                 int v = entering_vs[j];
@@ -97,9 +108,10 @@ private:
                 int u = unused.back();
                 unused.pop_back();
                 vertex_to_pos_[v] = u;
+                pos_to_vertex_[i][u] = v;
             }
 
-            if (current_vs.size() > max_frontier_size_) {
+            if (static_cast<int>(current_vs.size()) > max_frontier_size_) {
                 max_frontier_size_ = current_vs.size();
             }
 
@@ -171,8 +183,12 @@ public:
 
     // This function translates the vertex number to the position
     // in the PodArray used by FrontierExampleSpec.
-    int vertexToPos(short v) const {
+    int vertexToPos(int v) const {
         return vertex_to_pos_[v];
+    }
+
+    int posToVertex(int index, int pos) const {
+        return pos_to_vertex_[index][pos];
     }
 
     int getVerticesEnteringLevel(short v) const {
