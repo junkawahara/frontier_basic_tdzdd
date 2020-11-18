@@ -9,7 +9,7 @@ This program constructs a ZDD representing all the single cycles and a ZDD repre
 
 ```
 make
-./program grid3x3.txt
+./program --cycle --show grid3x3.txt
 ```
 
 You will get the following:
@@ -28,7 +28,7 @@ This constructs a ZDD representing all the single cycles.
 If you run
 
 ```
-./program grid3x3.txt -p
+./program --path --show grid3x3.txt
 ```
 
 You will get a ZDD representing all the s-t paths.
