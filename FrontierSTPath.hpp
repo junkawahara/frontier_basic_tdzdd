@@ -33,6 +33,7 @@ private:
 
     const int s_entered_level_;
     const int t_entered_level_;
+    const int all_v_entered_level_;
 
     // This function gets deg of v.
     short getDeg(FrontierData2* data, short v) const {
@@ -65,6 +66,17 @@ private:
         return m_ - fm_.getVerticesEnteringLevel(v);
     }
 
+    int computeAllVEnteredLevel() const {
+        int min_level = m_;
+        for (short v = 1; v <= n_; ++v) {
+            int level = computeEnteredLevel(v);
+            if (level < min_level) {
+                min_level = level;
+            }
+        }
+        return min_level;
+    }
+
 public:
     FrontierSTPathSpec(const tdzdd::Graph& graph,
                        bool isHamiltonian, short s, short t)
@@ -76,7 +88,8 @@ public:
           t_(t),
           fm_(graph_),
           s_entered_level_(computeEnteredLevel(s)),
-          t_entered_level_(computeEnteredLevel(t))
+          t_entered_level_(computeEnteredLevel(t)),
+          all_v_entered_level_(computeAllVEnteredLevel())
     {
         if (graph_.vertexSize() > SHRT_MAX) { // SHRT_MAX == 32767
             std::cerr << "The number of vertices should be at most "
@@ -169,15 +182,15 @@ public:
                     continue;
                 }
                 // skip if w is one of the vertices that
-                // has already leaved the frontier
-                bool found_leaved = false;
+                // has already left the frontier
+                bool found_left = false;
                 for (size_t k = 0; k < i; ++k) {
                     if (w == leaving_vs[k]) {
-                        found_leaved = true;
+                        found_left = true;
                         break;
                     }
                 }
-                if (found_leaved) {
+                if (found_left) {
                     continue;
                 }
                 frontier_exists = true;
@@ -211,7 +224,8 @@ public:
                     // a single cycle is completed.
                     // Then, we return the 1-terminal.
                     if (isHamiltonian_) {
-                        if (frontier_exists) {
+                        if (frontier_exists
+                            || level > all_v_entered_level_) {
                             return 0;
                         } else {
                             return -1; // return the 1-terminal
