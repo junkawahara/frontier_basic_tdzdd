@@ -20,6 +20,9 @@ using namespace tdzdd;
 #include "FrontierMate.hpp"
 #include "FrontierDegreeSpecified.hpp"
 
+#include "EnumSubgraphs.hpp"
+
+
 std::string getVertex(int i, int j) {
     std::ostringstream oss;
     oss << i << ":" << j;
@@ -84,6 +87,7 @@ int main(int argc, char** argv) {
 
         bool is_dot = false;
         bool is_show_fs = false;
+        bool is_enum = false;
 
         bool readfirst = false;
         for (int i = 1; i < argc; ++i) {
@@ -125,6 +129,8 @@ int main(int argc, char** argv) {
                 is_dot = true;
             } else if (std::string(argv[i]) == std::string("--show-fs")) {
                 is_show_fs = true;
+            } else if (std::string(argv[i]) == std::string("--enum")) {
+                is_enum = true;
             } else if (argv[i][0] == '-') {
                 std::cerr << "unknown option " << argv[i] << std::endl;
                 return 1;
@@ -218,6 +224,9 @@ int main(int argc, char** argv) {
 
         if (is_dot) {
             dd.dumpDot(std::cout);
+        }
+        if (is_enum) {
+            EnumSubgraphs::enumSubgraphs(std::cout, graph, dd);
         }
     }
 
