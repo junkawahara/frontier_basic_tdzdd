@@ -61,19 +61,19 @@ private:
         assert(static_cast<int>(entered_vs.size()) == n);
 
         // compute leaving_vss_
-        std::set<int> leaved_vs;
+        std::set<int> left_vs;
         for (int i = m - 1; i >= 0; --i) {
             const tdzdd::Graph::EdgeInfo& e = graph_.edgeInfo(i);
-            if (leaved_vs.count(e.v1) == 0) {
+            if (left_vs.count(e.v1) == 0) {
                 leaving_vss_[i].push_back(e.v1);
-                leaved_vs.insert(e.v1);
+                left_vs.insert(e.v1);
             }
-            if (leaved_vs.count(e.v2) == 0) {
+            if (left_vs.count(e.v2) == 0) {
                 leaving_vss_[i].push_back(e.v2);
-                leaved_vs.insert(e.v2);
+                left_vs.insert(e.v2);
             }
         }
-        assert(static_cast<int>(leaved_vs.size()) == n);
+        assert(static_cast<int>(left_vs.size()) == n);
     }
 
     void construct() {

@@ -142,15 +142,15 @@ public:
                     continue;
                 }
                 // skip if w is one of the vertices that
-                // has already leaved the frontier
-                bool found_leaved = false;
+                // has already left the frontier
+                bool found_left = false;
                 for (size_t k = 0; k < i; ++k) {
                     if (w == leaving_vs[k]) {
-                        found_leaved = true;
+                        found_left = true;
                         break;
                     }
                 }
-                if (found_leaved) {
+                if (found_left) {
                     continue;
                 }
                 frontier_exists = true;
