@@ -204,7 +204,7 @@ int main(int argc, char** argv) {
             degRanges.push_back(new IntRange(0, INT_MAX));
             degRanges.push_back(new IntRange(2, 2));
             degRanges.push_back(new IntRange(0, INT_MAX));
-            FrontierDegreeSpecifiedSpec spec(graph, degRanges);
+            FrontierDegreeSpecifiedSpec spec(graph, degRanges, true);
             dd = DdStructure<2>(spec);
         } else if (is_letter_P) {
             std::vector<IntSubset*> degRanges;
@@ -212,7 +212,7 @@ int main(int argc, char** argv) {
             degRanges.push_back(new IntRange(1, 1));
             degRanges.push_back(new IntRange(0, INT_MAX));
             degRanges.push_back(new IntRange(1, 1));
-            FrontierDegreeSpecifiedSpec spec(graph, degRanges);
+            FrontierDegreeSpecifiedSpec spec(graph, degRanges, true);
             dd = DdStructure<2>(spec);
         } else {
             std::cerr << "Please specify a kind of subgraphs." << std::endl;
